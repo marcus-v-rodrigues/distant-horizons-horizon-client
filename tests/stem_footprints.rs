@@ -3,7 +3,7 @@
 //! These test sparse added geometry; the existing coarse wood vote is unchanged.
 use dh::{BlockInfo, BlockTable, Dir, FullDataSource, Quad, SampledRun, Stem};
 use dh::{full_point, gen_step, material, pos, storage};
-use distant_horizons_for_horizon_client as dh;
+use distant_horizons_horizon_client as dh;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{Read, Write};
 

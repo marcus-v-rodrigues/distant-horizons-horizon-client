@@ -1,4 +1,4 @@
-use distant_horizons_for_horizon_client::{
+use distant_horizons_horizon_client::{
     BlockInfo, BlockTable, Dir, FullDataSource, RenderSettings, RenderSource, SampledRun, build_quads,
     column_from_runs, gen_step, material, pos, shade_open_water,
 };
@@ -150,7 +150,7 @@ fn retaining_aquatic_states_keeps_one_continuous_water_volume() {
     for hidden in [false, true] {
         let plain = mesh(false, hidden);
         let planted = mesh(true, hidden);
-        let geometry = |quads: Vec<distant_horizons_for_horizon_client::Quad>| {
+        let geometry = |quads: Vec<distant_horizons_horizon_client::Quad>| {
             let mut q: Vec<_> = quads
                 .into_iter()
                 .map(|q| (q.dir, q.plane, q.u0, q.v0, q.u1, q.v1, q.transparent, q.lower_top))
