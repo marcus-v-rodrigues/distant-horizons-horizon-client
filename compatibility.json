@@ -1,0 +1,11 @@
+{
+  "game": "26.3",
+  "horizon_repository": "https://github.com/horizon-rust/horizon",
+  "horizon_revision": "fdc87aecdbd116bf1e08adcd062fcbaea8c2e2ca",
+  "horizon_mixins_repository": "https://github.com/horizon-rust/horizon-mixins",
+  "horizon_mixins_revision": "ddd9700b21997c95d95ac6ee5ecafe3830cf622a",
+  "horizon_source_archive_sha256": "31cfc2e541a9eebdabcc8ffdff517442205004a0b98645bd2bb7b05b4fdf774f",
+  "horizon_mixins_patch": "tools/patches/horizon-mixins-f42-compat.patch",
+  "horizon_mixins_patch_sha256": "274600e5e6abf11eba8f5b7e5e5108f8c9cd93134a3c7bb3c23c645c2657076d",
+  "horizon_mixins_local_commit": "d4af4d82120dd9d1600f27cbebdcfa4fb6a224c8"
+}

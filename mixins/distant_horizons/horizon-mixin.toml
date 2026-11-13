@@ -1,0 +1,254 @@
+[mod]
+id = "distant_horizons"
+version = "0.1.0"
+priority = 100
+
+# The commit it was built and tested on. Besides the native hook points it
+# reads Horizon's chunks, world generator and renderer, and widens
+# `terrain_distance`: it is pinned to this commit.
+[compatibility]
+horizon_revision = "fdc87aecdbd116bf1e08adcd062fcbaea8c2e2ca"
+
+# The Distant Horizons core, Horizon-free (also the Cargo library).
+[[module]]
+id = "runtime"
+file = "crates/horizon-client/src/game.rs"
+name = "distant_horizons"
+source = "runtime.rs"
+
+# Horizon's side: blocks, chunks, generator, meshes, the session.
+[[module]]
+id = "bridge"
+file = "crates/horizon-client/src/game.rs"
+name = "distant_horizons_bridge"
+source = "bridge.rs"
+
+[[module]]
+id = "water_tint"
+file = "crates/horizon-client/src/game.rs"
+name = "distant_horizons_water_tint"
+source = "water_tint.rs"
+
+[[module]]
+id = "aquatic_models"
+file = "crates/horizon-client/src/game.rs"
+name = "distant_horizons_aquatic_models"
+source = "aquatic_models.rs"
+
+[[module]]
+id = "aquatic_lighting"
+file = "crates/horizon-client-render/src/mesher.rs"
+name = "distant_horizons_aquatic_lighting"
+source = "aquatic_lighting.rs"
+visibility = "pub"
+
+[[module]]
+id = "aquatic_columns"
+file = "crates/horizon-client-render/src/lod.rs"
+name = "distant_horizons_aquatic_columns"
+source = "aquatic_columns.rs"
+visibility = "pub"
+
+[[injection]]
+id = "aquatic_generated"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_lib::vanillagen::lod::columns"
+helper = "aquatic_generated.rs"
+bindings = [
+  { name = "chunk", ty = "&horizon_world::worldgen::generator::ProtoChunk", value = "chunk" },
+  { name = "biome_map", ty = "&[u16]", value = "biome_map" },
+  { name = "dimension", ty = "&str", value = "dimension" },
+]
+
+[[injection]]
+id = "aquatic_saved"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_lib::save::decode_lod_surfaces"
+helper = "aquatic_saved.rs"
+bindings = [
+  { name = "root", ty = "&horizon_world::nbt::NamedTag", value = "root" },
+  { name = "assets", ty = "&crate::assets::Assets", value = "assets" },
+  { name = "biomes", ty = "&crate::biome::Biomes", value = "biomes" },
+  { name = "layout", ty = "crate::chunk::ColumnLayout", value = "layout" },
+  { name = "sky_light", ty = "bool", value = "sky_light" },
+]
+
+[[injection]]
+id = "aquatic_kinds"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::lod::state_kinds"
+helper = "aquatic_kinds.rs"
+bindings = [
+  { name = "facts", ty = "&crate::blocks::BlockFacts", value = "facts" },
+]
+
+[[injection]]
+id = "aquatic_cache_key"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::lod::cache::build_key"
+helper = "aquatic_cache_key.rs"
+bindings = [
+  { name = "states", ty = "usize", value = "states" },
+  { name = "biomes", ty = "usize", value = "biomes" },
+]
+
+[[injection]]
+id = "aquatic_summary_encode"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::server_terrain::encode"
+helper = "aquatic_summary_encode.rs"
+bindings = [
+  { name = "x", ty = "i32", value = "x" },
+  { name = "z", ty = "i32", value = "z" },
+  { name = "columns", ty = "&[crate::lod::Column; 256]", value = "columns" },
+]
+
+[[injection]]
+id = "aquatic_summary_decode"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::server_terrain::decode"
+helper = "aquatic_summary_decode.rs"
+bindings = [
+  { name = "tag", ty = "&horizon_world::nbt::Tag", value = "tag" },
+]
+
+[[module]]
+id = "stem_capture"
+file = "crates/horizon-client/src/client_lib.rs"
+name = "distant_horizons_stem_capture"
+source = "stem_capture.rs"
+visibility = "pub"
+
+[[injection]]
+id = "capture_vegetation"
+kind = "HEAD"
+target = "horizon_client_lib::vanillagen::lod::vegetation::Vegetation::apply"
+helper = "capture_vegetation.rs"
+bindings = [
+  { name = "vegetation", ty = "&crate::vanillagen::lod::vegetation::Vegetation", value = "self" },
+  { name = "column", ty = "&crate::lod::Column", value = "column" },
+  { name = "x", ty = "i32", value = "x" },
+  { name = "z", ty = "i32", value = "z" },
+  { name = "width", ty = "i32", value = "width" },
+  { name = "light", ty = "u16", value = "light" },
+]
+
+[[injection]]
+id = "capture_cached_stems"
+kind = "HEAD"
+target = "horizon_client_lib::vanillagen::lod::<VanillaLodSampler as LodSampler>::grid"
+helper = "capture_cached_stems.rs"
+bindings = [
+  { name = "sampler", ty = "&crate::vanillagen::lod::VanillaLodSampler", value = "self" },
+  { name = "x", ty = "i32", value = "x" },
+  { name = "z", ty = "i32", value = "z" },
+  { name = "width", ty = "i32", value = "width" },
+  { name = "side", ty = "usize", value = "side" },
+]
+
+[[injection]]
+id = "frame"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_frame"
+helper = "frame.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "distance"
+kind = "RETURN"
+target = "horizon_client::game::Game<'_>::terrain_distance"
+helper = "distance.rs"
+bindings = [
+  { name = "value", ty = "i32", value = "$value" },
+]
+
+[[injection]]
+id = "shutdown"
+kind = "HEAD"
+target = "horizon_client::game::Game<'_>::shut_down"
+helper = "shutdown.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "fog"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_render_fog"
+helper = "fog.rs"
+bindings = [
+  { name = "game", ty = "&crate::game::Game<'_>", value = "self" },
+  { name = "fog_type", ty = "horizon_client::fog::FogType", value = "fog_type" },
+  { name = "fog", ty = "&mut horizon_client::fog::FogData", value = "&mut *fog" },
+]
+
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+[[injection]]
+id = "settings"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings"
+helper = "settings.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "buttons", ty = "&mut Vec<String>", value = "&mut *buttons" },
+]
+
+[[injection]]
+id = "click"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings_click"
+helper = "click.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "button", ty = "usize", value = "button" },
+]
+
+[[injection]]
+id = "chat_tree"
+kind = "RETURN"
+target = "horizon_client::game::chat::Game<'_>::chat_tree_for"
+helper = "chat_tree.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "value", ty = "horizon_client::command::Dispatcher", value = "$value" },
+]
+
+[[injection]]
+id = "command"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_command"
+helper = "command.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "command", ty = "&str", value = "command" },
+  { name = "ran", ty = "&mut bool", value = "&mut *ran" },
+]
+
+[[injection]]
+id = "hud"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_hud"
+helper = "hud.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "batch", ty = "&mut horizon_client::hud::HudBatch", value = "&mut *batch" },
+  { name = "corners", ty = "&mut horizon_client::extras_hud::Corners", value = "&mut *corners" },
+]
